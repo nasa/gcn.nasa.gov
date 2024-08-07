@@ -94,6 +94,15 @@ legacy_users
   email *String
   PointInTimeRecovery true
 
+kafka_acls
+  aclId *String
+  PointInTimeRecovery true
+
+kafka_acl_log
+  partitionKey *Number
+  syncedOn **Number
+  PointInTimeRecovery ture
+
 @tables-indexes
 email_notification_subscription
   topic *String
@@ -142,6 +151,10 @@ legacy_users
 synonyms
   synonymId *String
   name synonymsByUuid
+
+kafka_acls
+  resourceName *String
+  name aclsByResourceName
 
 @aws
 runtime nodejs20.x

@@ -5155,5 +5155,29 @@
       "requestorEmail": "example@example.com",
       "subject": "Optical Observations for GRB 971227"
     }
+  ],
+  "kafka_acls": [
+    {
+      "aclId": "12345678-abcd-1234-abcd-1234abcd1234",
+      "resourceName": "test_topic_created_from_website",
+      "prefixed": false,
+      "permissionType": 3,
+      "operation": 3,
+      "host": "*",
+      "principal": "some-user-group",
+      "resourcePatternType": 3,
+      "resourceType": 2
+    },
+    {
+      "aclId": "62fe8590-42e4-4917-afea-db6a0a84079a",
+      "resourceName": "test_topic_created_from_website",
+      "prefixed": false,
+      "permissionType": 3,
+      "operation": 4,
+      "host": "*",
+      "principal": "some-user-group",
+      "resourcePatternType": 3,
+      "resourceType": 2
+    }
   ]
 }
