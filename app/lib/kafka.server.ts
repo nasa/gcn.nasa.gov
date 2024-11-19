@@ -9,7 +9,6 @@ import { tables } from '@architect/functions'
 import { paginateScan } from '@aws-sdk/lib-dynamodb'
 import type { DynamoDBDocument } from '@aws-sdk/lib-dynamodb'
 import crypto from 'crypto'
-import type { AclFilter } from 'gcn-kafka'
 import { Kafka } from 'gcn-kafka'
 import type { AclEntry } from 'kafkajs'
 import {
@@ -113,101 +112,6 @@ function validateUser(user: User) {
     throw new Response(null, { status: 403 })
 }
 
-export async function createKafkaACL(
-  user: User,
-  userClientType: UserClientType,
-  resourceName: string,
-  group: string,
-  permissionType: number,
-  resourceType: number,
-  includePrefixed: boolean
-) {
-  const acls: KafkaACL[] =
-    userClientType == 'consumer'
-      ? consumerOperations.map((operation) => {
-          return {
-            resourceName,
-            principal: `User:${group}`,
-            host: '*',
-            operation,
-            permissionType,
-            resourcePatternType: 3,
-            resourceType,
-          }
-        })
-      : producerOperations.map((operation) => {
-          return {
-            resourceName,
-            principal: `User:${group}`,
-            host: '*',
-            operation,
-            permissionType,
-            resourcePatternType: 3,
-            resourceType,
-          }
-        })
-
-  if (includePrefixed) {
-    const prefixedAcls =
-      userClientType === 'consumer'
-        ? consumerOperations.map((operation) => {
-            return {
-              resourceName,
-              principal: `User:${group}`,
-              host: '*',
-              operation,
-              permissionType,
-              resourcePatternType: 4,
-              resourceType,
-            }
-          })
-        : producerOperations.map((operation) => {
-            return {
-              resourceName,
-              principal: `User:${group}`,
-              host: '*',
-              operation,
-              permissionType,
-              resourcePatternType: 4,
-              resourceType,
-            }
-          })
-    acls.push(...prefixedAcls)
-  }
-
-  await createKafkaACLInternal(user, acls)
-}
-
-async function createKafkaACLInternal(user: User, acls: KafkaACL[]) {
-  validateUser(user)
-  // Save to db
-  const db = await tables()
-  await Promise.all(
-    acls.map((acl) => db.kafka_acls.put({ ...acl, aclId: crypto.randomUUID() }))
-  )
-
-  // Add to Kafka
-  const adminClient = adminKafka.admin()
-  await adminClient.connect()
-  if (acls.some((acl) => acl.resourceType === AclResourceTypes.TOPIC))
-    await Promise.all(
-      acls
-        .filter((acl) => acl.resourceType === AclResourceTypes.TOPIC)
-        .map((acl) =>
-          adminClient.createTopics({
-            topics: [
-              {
-                topic: acl.resourceName,
-              },
-            ],
-          })
-        )
-    )
-
-  await adminClient.createAcls({ acl: acls })
-  await adminClient.disconnect()
-}
-
 export async function getKafkaACLsFromDynamoDB(user: User, filter?: string) {
   validateUser(user)
   const db = await tables()
@@ -250,8 +154,6 @@ export async function getAclsFromBrokers() {
 
   const results: KafkaACL[] = []
   for (const item of acls.resources) {
-    console.log('Item:', item)
-
     results.push(
       ...item.acls.map((acl) => {
         return {
@@ -265,27 +167,6 @@ export async function getAclsFromBrokers() {
   }
 
   return results
-}
-
-export async function deleteKafkaACL(user: User, aclIds: string[]) {
-  validateUser(user)
-  const db = await tables()
-  const acls: KafkaACL[] = await Promise.all(
-    aclIds.map((aclId) => db.kafka_acls.get({ aclId }))
-  )
-
-  const adminClient = adminKafka.admin()
-  await adminClient.connect()
-  await adminClient.deleteAcls({ filters: acls as AclFilter[] })
-  await adminClient.disconnect()
-
-  await Promise.all(
-    acls.map((acl) =>
-      db.kafka_acls.delete({
-        aclId: acl.aclId,
-      })
-    )
-  )
 }
 
 export async function updateDbFromBrokers(user: User) {

@@ -7,31 +7,17 @@
  */
 import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node'
 import { useFetcher, useLoaderData } from '@remix-run/react'
-import type { ModalRef } from '@trussworks/react-uswds'
-import {
-  Button,
-  Grid,
-  Icon,
-  Label,
-  Modal,
-  ModalFooter,
-  ModalHeading,
-  ModalToggleButton,
-  TextInput,
-} from '@trussworks/react-uswds'
+import { Button, Label, Table, TextInput } from '@trussworks/react-uswds'
 import { groupBy, sortBy } from 'lodash'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { getUser } from './_auth/user.server'
-import HeadingWithAddButton from '~/components/HeadingWithAddButton'
 import SegmentedCards from '~/components/SegmentedCards'
 import Spinner from '~/components/Spinner'
 import TimeAgo from '~/components/TimeAgo'
-import type { KafkaACL, UserClientType } from '~/lib/kafka.server'
+import type { KafkaACL } from '~/lib/kafka.server'
 import {
   adminGroup,
-  createKafkaACL,
-  deleteKafkaACL,
   getKafkaACLsFromDynamoDB,
   getLastSyncDate,
   updateDbFromBrokers,
@@ -63,58 +49,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
   if (intent === 'migrateFromBroker') {
     await updateDbFromBrokers(user)
-    return null
   }
-
-  const promises = []
-
-  switch (intent) {
-    case 'delete':
-      const aclId = getFormDataString(data, 'aclId')
-      if (!aclId) throw new Response(null, { status: 400 })
-      promises.push(deleteKafkaACL(user, [aclId]))
-      break
-    case 'create':
-      const resourceName = getFormDataString(data, 'resourceName')
-      const userClientType = getFormDataString(
-        data,
-        'userClientType'
-      ) as UserClientType
-      const group = getFormDataString(data, 'group')
-      const permissionTypeString = getFormDataString(data, 'permissionType')
-      const includePrefixed = getFormDataString(data, 'includePrefixed')
-      const resourceTypeString = getFormDataString(data, 'resourceType')
-
-      if (
-        !resourceName ||
-        !userClientType ||
-        !group ||
-        !permissionTypeString ||
-        !resourceTypeString
-      )
-        throw new Response(null, { status: 400 })
-
-      const permissionType = parseInt(permissionTypeString) // Allow, deny
-      const resourceType = parseInt(resourceTypeString)
-
-      promises.push(
-        createKafkaACL(
-          user,
-          userClientType,
-          resourceName,
-          group,
-          permissionType,
-          resourceType,
-          Boolean(includePrefixed)
-        )
-      )
-
-      break
-    default:
-      break
-  }
-  await Promise.all(promises)
-
   return null
 }
 
@@ -131,7 +66,7 @@ export default function Index() {
 
   return (
     <>
-      <HeadingWithAddButton headingLevel={1}>Kafka</HeadingWithAddButton>
+      <h1>Kafka</h1>
       <h2>Kafka ACLs</h2>
       <p className="usa-paragraph">
         Kafka Access Control Lists (ACLs) are a security mechanism used to
@@ -198,10 +133,24 @@ export default function Index() {
               .sort((a, b) => a.localeCompare(b))
               .flatMap((key) => (
                 <span key={key}>
-                  <h3>Resource: {key}</h3>
-                  {aclData[key].map((acl, index) => (
-                    <KafkaAclCard key={`${key}-${index}`} acl={acl} />
-                  ))}
+                  <div className="position-sticky top-0 bg-white z-100 padding-y-2">
+                    <h3 className="margin-y-0">Resource: {key}</h3>
+                  </div>
+                  <Table>
+                    <thead>
+                      <tr>
+                        <th>Type</th>
+                        <th>Group</th>
+                        <th>Permission</th>
+                        <th>Operation</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {aclData[key].map((acl, index) => (
+                        <KafkaAclCard key={`${key}-${index}`} acl={acl} />
+                      ))}
+                    </tbody>
+                  </Table>
                 </span>
               ))}
           </SegmentedCards>
@@ -212,10 +161,6 @@ export default function Index() {
 }
 
 function KafkaAclCard({ acl }: { acl: KafkaACL }) {
-  const ref = useRef<ModalRef>(null)
-  const fetcher = useFetcher()
-  const disabled = fetcher.state !== 'idle'
-
   // TODO: These maps can probably be refactored, since they are
   // just inverting the enum from kafka, but importing them
   // directly here causes some errors. Same for mapping them to
@@ -252,64 +197,11 @@ function KafkaAclCard({ acl }: { acl: KafkaACL }) {
   }
 
   return (
-    <>
-      <Grid row style={disabled ? { opacity: '50%' } : undefined}>
-        <div className="tablet:grid-col flex-fill margin-y-1">
-          <div>
-            <strong>Type:</strong> {resourceTypeMap[acl.resourceType]}
-          </div>
-          <div>
-            <strong>Group:</strong> {acl.principal}
-          </div>
-          <div>
-            <strong>Permission:</strong> {permissionMap[acl.permissionType]}
-          </div>
-          <div>
-            <strong>Operation:</strong> {operationMap[acl.operation]}
-          </div>
-        </div>
-        <div className="tablet:grid-col flex-auto margin-y-auto">
-          <ModalToggleButton
-            opener
-            disabled={disabled}
-            modalRef={ref}
-            type="button"
-            className="usa-button--secondary"
-          >
-            <Icon.Delete
-              role="presentation"
-              className="bottom-aligned margin-right-05"
-            />
-            Delete
-          </ModalToggleButton>
-        </div>
-      </Grid>
-      <Modal
-        id="modal-delete"
-        ref={ref}
-        aria-labelledby="modal-delete-heading"
-        aria-describedby="modal-delete-description"
-        renderToPortal={false}
-      >
-        <fetcher.Form method="POST" action="/admin/kafka">
-          <input type="hidden" name="aclId" value={acl.aclId} />
-          <ModalHeading id="modal-delete-heading">
-            Delete Kafka ACL
-          </ModalHeading>
-          <p id="modal-delete-description">
-            This will delete the DynamoDB entry and remove the ACL from the
-            broker. Do you wish to continue?
-          </p>
-          <ModalFooter>
-            <ModalToggleButton modalRef={ref} closer outline>
-              Cancel
-            </ModalToggleButton>
-            <Button data-close-modal type="submit" name="intent" value="delete">
-              Delete
-            </Button>
-          </ModalFooter>
-        </fetcher.Form>
-      </Modal>
-    </>
+    <tr className="tablet:grid-col flex-fill margin-y-1">
+      <td>{resourceTypeMap[acl.resourceType]}</td>
+      <td>{acl.principal}</td>
+      <td>{permissionMap[acl.permissionType]}</td>
+      <td>{operationMap[acl.operation]}</td>
+    </tr>
   )
 }
