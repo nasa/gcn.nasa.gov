@@ -288,14 +288,6 @@ export async function deleteKafkaACL(user: User, aclIds: string[]) {
   )
 }
 
-export async function updateBrokersFromDb(user: User) {
-  const dbDefinedAcls = await getKafkaACLsFromDynamoDB(user)
-  const adminClient = adminKafka.admin()
-  await adminClient.connect()
-  await adminClient.createAcls({ acl: dbDefinedAcls })
-  await adminClient.disconnect()
-}
-
 export async function updateDbFromBrokers(user: User) {
   const kafkaDefinedAcls = await getAclsFromBrokers()
   const db = await tables()

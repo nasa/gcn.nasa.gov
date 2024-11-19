@@ -34,7 +34,6 @@ import {
   deleteKafkaACL,
   getKafkaACLsFromDynamoDB,
   getLastSyncDate,
-  updateBrokersFromDb,
   updateDbFromBrokers,
 } from '~/lib/kafka.server'
 import { getFormDataString } from '~/lib/utils'
@@ -64,11 +63,6 @@ export async function action({ request }: ActionFunctionArgs) {
 
   if (intent === 'migrateFromBroker') {
     await updateDbFromBrokers(user)
-    return null
-  }
-
-  if (intent === 'migrateFromDB') {
-    await updateBrokersFromDb(user)
     return null
   }
 
@@ -130,7 +124,6 @@ export default function Index() {
   const updateFetcher = useFetcher<typeof action>()
   const aclFetcher = useFetcher<typeof loader>()
   const brokerFromDbFetcher = useFetcher()
-  const ref = useRef<ModalRef>(null)
 
   useEffect(() => {
     setAclData(aclFetcher.data?.dynamoDbAclData ?? aclData)
@@ -175,16 +168,6 @@ export default function Index() {
       ) : (
         <br />
       )}
-      <ModalToggleButton
-        opener
-        disabled={
-          updateFetcher.state !== 'idle' || brokerFromDbFetcher.state !== 'idle'
-        }
-        modalRef={ref}
-        type="button"
-      >
-        Update Broker from DB
-      </ModalToggleButton>
       {brokerFromDbFetcher.state !== 'idle' && (
         <span className="text-middle">
           <Spinner /> Updating...
@@ -224,37 +207,6 @@ export default function Index() {
           </SegmentedCards>
         </>
       )}
-      <Modal
-        id="modal-update"
-        ref={ref}
-        aria-labelledby="modal-update-heading"
-        aria-describedby="modal-update-description"
-        renderToPortal={false} // FIXME: https://github.com/trussworks/react-uswds/pull/1890#issuecomment-1023730448
-      >
-        <brokerFromDbFetcher.Form method="POST" action="/admin/kafka">
-          <ModalHeading id="modal-update-heading">Confirm Update</ModalHeading>
-          <p id="modal-update-description">
-            This will affect some_number of ACLs currently defined on the
-            broker. If you want to maintain the ACLs defined on the brokers,
-            click cancel to close this window then click the Pull ACLs from
-            Broker button.
-          </p>
-          <p>This action cannot be undone.</p>
-          <ModalFooter>
-            <ModalToggleButton modalRef={ref} closer outline>
-              Cancel
-            </ModalToggleButton>
-            <Button
-              data-close-modal
-              type="submit"
-              name="intent"
-              value="migrateFromDB"
-            >
-              Confirm
-            </Button>
-          </ModalFooter>
-        </brokerFromDbFetcher.Form>
-      </Modal>
     </>
   )
 }
