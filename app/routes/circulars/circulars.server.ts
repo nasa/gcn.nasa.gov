@@ -242,10 +242,9 @@ export async function get(
 ): Promise<Circular> {
   const circularVersions = await getDynamoDBVersionAutoIncrement(circularId)
   const result = await circularVersions.get(version)
-  if (!result)
-    throw new Response(null, {
-      status: 404,
-    })
+  if (!result) {
+    throw redirect('/circulars')
+  }
   return result as Circular
 }
 

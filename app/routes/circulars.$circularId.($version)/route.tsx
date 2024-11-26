@@ -72,6 +72,12 @@ export default function () {
   const linkString = `/circulars/${circularId}${
     !latest && version ? `/${version}` : ''
   }`
+  const previousCircularLinkString = `/circulars/${circularId - 1}${
+    version ? `/${version}` : ''
+  }`
+  const nextCircularLinkString = `/circulars/${circularId + 1}${
+    version ? `/${version}` : ''
+  }`
   return (
     <>
       <ToolbarButtonGroup className="flex-wrap">
@@ -144,6 +150,26 @@ export default function () {
       <h1 className="margin-bottom-0">GCN Circular {circularId}</h1>
       <FrontMatter {...frontMatter} />
       <Body className="margin-y-2">{body}</Body>
+      <ButtonGroup className="display-flex flex-justify-center">
+        <Link to={`${previousCircularLinkString}`} className="usa-button">
+          <div className="position-relative">
+            <Icon.ArrowBack
+              role="presentation"
+              className="position-absolute top-0 left-0"
+            />
+          </div>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Previous Circular
+        </Link>
+        <Link to={`${nextCircularLinkString}`} className="usa-button">
+          <div className="position-relative">
+            <Icon.ArrowForward
+              role="presentation"
+              className="position-absolute top-0 left-0"
+            />
+          </div>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Next Circular
+        </Link>
+      </ButtonGroup>
     </>
   )
 }
