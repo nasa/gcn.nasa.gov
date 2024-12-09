@@ -5,11 +5,23 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
+import { tables } from '@architect/functions'
+import { paginateScan } from '@aws-sdk/lib-dynamodb'
+import type { DynamoDBDocument } from '@aws-sdk/lib-dynamodb'
+import crypto from 'crypto'
 import { Kafka } from 'gcn-kafka'
+import type { AclEntry } from 'kafkajs'
+import {
+  AclOperationTypes,
+  AclPermissionTypes,
+  AclResourceTypes,
+  ResourcePatternTypes,
+} from 'kafkajs'
 import memoizee from 'memoizee'
 import { custom } from 'openid-client'
 
 import { domain, getEnvOrDieInProduction } from './env.server'
+import type { User } from '~/routes/_auth/user.server'
 
 const client_id = getEnvOrDieInProduction('KAFKA_CLIENT_ID') ?? ''
 const client_secret = getEnvOrDieInProduction('KAFKA_CLIENT_SECRET')
@@ -76,4 +88,125 @@ if (process.env.ARC_SANDBOX) {
     const producer = await getProducer()
     await producer.send({ topic, messages: [{ value }] })
   }
+}
+
+export type KafkaACL = AclEntry & {
+  aclId?: string
+}
+
+export type UserClientType = 'producer' | 'consumer'
+
+export const adminGroup = 'gcn.nasa.gov/gcn-admin'
+
+export const consumerOperations = [
+  AclOperationTypes.READ,
+  AclOperationTypes.DESCRIBE,
+]
+export const producerOperations = [
+  AclOperationTypes.CREATE,
+  AclOperationTypes.WRITE,
+  AclOperationTypes.DESCRIBE,
+]
+
+const admin_client_id = getEnvOrDieInProduction('KAFKA_ADMIN_CLIENT_ID') ?? ''
+const admin_client_secret = getEnvOrDieInProduction('KAFKA_ADMIN_CLIENT_SECRET')
+const adminKafka = new Kafka({
+  client_id: admin_client_id,
+  client_secret: admin_client_secret,
+  domain,
+})
+
+function validateUser(user: User) {
+  if (!user.groups.includes(adminGroup))
+    throw new Response(null, { status: 403 })
+}
+
+export async function getKafkaACLsFromDynamoDB(user: User, filter?: string) {
+  validateUser(user)
+  const db = await tables()
+  const client = db._doc as unknown as DynamoDBDocument
+  const TableName = db.name('kafka_acls')
+  const pages = paginateScan(
+    { client },
+    {
+      TableName,
+      FilterExpression: filter
+        ? 'contains(resourceName, :filter) OR contains(cognitoGroup, :filter)'
+        : undefined,
+      ExpressionAttributeValues: filter
+        ? {
+            ':filter': filter,
+          }
+        : undefined,
+    }
+  )
+
+  const acls: KafkaACL[] = []
+  for await (const page of pages) {
+    const newACL = page.Items as KafkaACL[]
+    if (newACL) acls.push(...newACL)
+  }
+  return acls
+}
+
+export async function getAclsFromBrokers() {
+  const adminClient = adminKafka.admin()
+  await adminClient.connect()
+  const acls = await adminClient.describeAcls({
+    resourceType: AclResourceTypes.ANY,
+    host: '*',
+    permissionType: AclPermissionTypes.ANY,
+    operation: AclOperationTypes.ANY,
+    resourcePatternType: ResourcePatternTypes.ANY,
+  })
+  await adminClient.disconnect()
+
+  const results: KafkaACL[] = []
+  for (const item of acls.resources) {
+    results.push(
+      ...item.acls.map((acl) => {
+        return {
+          ...acl,
+          resourceName: item.resourceName,
+          resourceType: item.resourceType,
+          resourcePatternType: item.resourcePatternType,
+        }
+      })
+    )
+  }
+
+  return results
+}
+
+export async function updateDbFromBrokers(user: User) {
+  const kafkaDefinedAcls = await getAclsFromBrokers()
+  const db = await tables()
+  await Promise.all([
+    ...kafkaDefinedAcls.map((acl) =>
+      db.kafka_acls.put({ ...acl, aclId: crypto.randomUUID() })
+    ),
+    db.kafka_acl_log.put({
+      partitionKey: 1,
+      syncedOn: Date.now(),
+      syncedBy: user.email,
+    }),
+  ])
+}
+
+type KafkaAclSyncLog = {
+  partitionKey: number
+  syncedOn: number
+  syncedBy: string
+}
+
+export async function getLastSyncDate(): Promise<KafkaAclSyncLog> {
+  const db = await tables()
+  return (
+    await db.kafka_acl_log.query({
+      KeyConditionExpression: 'partitionKey = :1',
+      ExpressionAttributeValues: { ':1': 1 },
+      ScanIndexForward: false,
+      Limit: 1,
+    })
+  ).Items.pop() as KafkaAclSyncLog
 }

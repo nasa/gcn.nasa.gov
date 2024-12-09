@@ -27,6 +27,9 @@ export default function () {
         <div className="desktop:grid-col-3">
           <SideNav
             items={[
+              <NavLink key="kafka" to="kafka" end>
+                Kafka
+              </NavLink>,
               <NavLink key="users" to="users" end>
                 Users
               </NavLink>,

@@ -4,7 +4,6 @@ import { defineConfig, devices } from '@playwright/test'
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
  */
-// require('dotenv').config();
 
 const deviceList = ['Desktop Firefox', 'Desktop Chrome', 'Desktop Safari']
 
@@ -69,7 +68,6 @@ export default defineConfig({
     command: 'npm run dev',
     url: 'http://localhost:3333',
     reuseExistingServer: !process.env.CI,
-    stdout: 'pipe',
     timeout: 120 * 1000, // 120 Seconds timeout on webServer
   },
 })
