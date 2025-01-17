@@ -207,7 +207,7 @@ In continuation of consumer loop, use the following functions to decode `base64`
 import base64
 
 # Convert the Kafka message value to a string
-value_str = value.decode("utf-8").strip()
+value_str = value.decode("utf-8")
 
 # Parse the JSON data
 value_json = json.loads(value_str)
