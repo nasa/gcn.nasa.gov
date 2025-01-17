@@ -199,7 +199,7 @@ for message in consumer.consume(timeout=1):
 
 ## Decoding Embedded Data
 
-The following code demonstrates how to decode bytes to `base64` for transfer over an ASCII medium. Python's built-in [`base64`](https://docs.python.org/3/library/base64.html#base64.b64encode) module provides the `b64decode` and `b64encode` methods to make this task simple. Additionally, JSON is serialized with Unicode, not ASCII, requires the proper handling of non-ASCII characters when encoding and decoding data.
+The following code demonstrates how to decode bytes to `base64` for transfer over an ASCII medium. Python's built-in [`base64`](https://docs.python.org/3/library/base64.html#base64.b64encode) module provides the `b64decode` and `b64encode` methods to make this task simple. JSON is serialized with Unicode, not ASCII, so it requires the proper handling of non-ASCII characters when encoding and decoding data.
 
 In continuation of consumer loop, use the following functions to decode `base64` text to bytes, write into a `.fits` file
 
