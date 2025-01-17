@@ -182,7 +182,7 @@ consumer = Consumer(client_id='fill me in', # Replace with your client ID
 )
 
 # Subscribe to Kafka topic
-consumer.subscribe(['gcn.circulars'])
+consumer.subscribe(['igwn.gwalert'])
 
 # Continuously consume and parse JSON data
 for message in consumer.consume(timeout=1):
