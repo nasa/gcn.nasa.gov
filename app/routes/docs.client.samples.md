@@ -12,7 +12,7 @@ and some samples from the FAQs section of the [gcn-kafka-python](https://github.
 
 To contribute your own ideas, make a GitHub pull request to add it to [the Markdown source for this document](https://github.com/nasa-gcn/gcn.nasa.gov/blob/CodeSamples/app/routes/docs.client.samples.md), or [contact us](/contact).
 
-## Parsing
+## Parsing XML
 
 Within your consumer loop, use the following functions to convert the
 content of `message.value()` into other data types.
@@ -162,3 +162,106 @@ for message in consumer.consume(end[0].offset - start[0].offset, timeout=1):
             continue
     print(message.value())
 ```
+
+## Parsing JSON
+
+GCN Notices for new missions are typically distributed in JSON format. This guide explains how to programmatically read the JSON schema.
+
+Start with subscribing to a Kafka topic and parsing the JSON data
+
+```python
+from gcn_kafka import Consumer
+import json
+
+# Connect as a Kafka consumer
+consumer = Consumer(client_id='fill me in', # Replace with your client ID
+    client_secret='fill me in',             # Replace with your client secret
+    config={"message.max.bytes": 204194304},
+)
+
+# Subscribe to Kafka topic
+consumer.subscribe(['igwn.gwalert'])
+
+# Continuously consume and parse JSON data
+for message in consumer.consume(timeout=1):
+    if message.error():
+        print(message.error())
+        continue
+
+    # Print the topic and message ID
+    print(f"topic={message.topic()}, offset={message.offset()}")
+
+    # Kafka message value as a Base64-encoded string
+    value = message.value()
+```
+
+## Decoding Embedded Data
+
+The following code demonstrates how to process a Kafka message containing a `base64` encoded skymap, decode it, and save it as a `.fits` file. Python's built-in [`base64`](https://docs.python.org/3/library/base64.html#base64.b64encode) module provides the `b64decode` method to make this task simple. JSON serialization uses Unicode, can handle a wide range of characters, enabling reliable handling of encoded data.
+
+```python
+import base64
+
+# Convert the Kafka message value to a string
+value_str = value.decode("utf-8")
+
+# Parse the JSON data
+value_json = json.loads(value_str)
+
+# Extract the Base64-encoded skymap
+skymap_string = value_json["event"]["skymap"]
+
+# Decode the Base64 string
+decoded_bytes = base64.b64decode(skymap_string)
+
+# Save the decoded data as a FITS file
+with open("skymap.fits", "wb") as fitsFile:
+    fitsFile.write(decoded_bytes)
+```
+
+If you want to include a FITS file in a Notice, you add a property to your schema definition in the following format:
+
+```python
+{
+    type: 'string',
+    contentEncoding: 'base64',
+    contentMediaType: 'image/fits',
+}
+```
+
+## Encoding Embedded Data
+
+For producer data production pipelines, the following encoding steps convert an input file to a bytestring. This guide demonstrates how to encode a file (e.g., skymap.fits) into a `base64` encoded string and submit it to the GCN Kafka broker.
+
+```python
+from gcn_kafka import Producer
+import base64
+
+# Set Kafka Topic and Producer Configuration
+TOPIC = "igwn.gwalert"
+
+producer = Producer(client_id='fill me in', # Replace with your client ID
+    client_secret='fill me in',             # Replace with your client secret
+    config={"message.max.bytes": 204194304},
+)
+
+data = {
+    # ..
+}
+
+# Encode the file content in base64
+with open("skymap.fits", "rb") as file:
+    data["skymap"] = base64.b64encode(file.read())
+
+# Convert the dictionary into bytes
+data_string = str(data).encode()
+
+producer.produce(
+    TOPIC,
+    data_string,
+)
+
+producer.flush()
+```
+
+See [non-JSON data](https://json-schema.org/understanding-json-schema/reference/non_json_data.html) for more information.
