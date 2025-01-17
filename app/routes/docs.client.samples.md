@@ -240,7 +240,7 @@ from gcn_kafka import Producer
 import base64
 
 # Set Kafka Topic and Producer Configuration
-TOPIC = "gcn.circulars"
+TOPIC = "igwn.gwalert"
 
 producer = Producer(client_id='fill me in', # Replace with your client ID
     client_secret='fill me in',             # Replace with your client secret
