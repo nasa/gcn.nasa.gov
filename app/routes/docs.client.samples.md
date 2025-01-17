@@ -213,19 +213,6 @@ value_json = json.loads(value_str)
 # Extract the Base64-encoded skymap
 skymap_string = value_json["event"]["skymap"]
 
-# Function to validate Base64 strings
-def is_base64(s):
-    try:
-        base64.b64decode(s, validate=True)
-        return True
-    except Exception:
-        return False
-
-# Validate the skymap string
-if not is_base64(skymap_string):
-    print("Invalid Base64 string.")
-    continue
-
 # Decode the Base64 string
 decoded_bytes = base64.b64decode(skymap_string)
 
