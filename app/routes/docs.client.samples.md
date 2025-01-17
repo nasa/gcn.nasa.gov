@@ -231,4 +231,34 @@ If you want to include a FITS file in a Notice, you add a property to your schem
 }
 ```
 
-In your data production pipeline, you can use the encoding steps to convert your file to a bytestring and set the value of the property to this bytestring. See [non-JSON data](https://json-schema.org/understanding-json-schema/reference/non_json_data.html) for more information.
+In your data production pipeline, you can use the encoding steps to convert your file to a bytestring and set the value of the property to this bytestring.
+
+```
+from gcn_kafka import Producer
+import base64
+
+TOPIC = "gcn.circulars"
+
+producer = Producer(client_id='fill me in', # Replace with your client ID
+    client_secret='fill me in',             # Replace with your client secret
+    config={"message.max.bytes": 204194304},
+)
+
+data = {
+    # ..
+}
+
+with open("skymap.fits", "rb") as file:
+    data["skymap"] = base64.b64encode(file.read())
+
+data_string = str(data).encode()
+
+producer.produce(
+    TOPIC,
+    data_string,
+)
+
+producer.flush()
+```
+
+See [non-JSON data](https://json-schema.org/understanding-json-schema/reference/non_json_data.html) for more information.
