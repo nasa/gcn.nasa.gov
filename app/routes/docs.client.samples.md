@@ -233,7 +233,7 @@ If you want to include a FITS file in a Notice, you add a property to your schem
 
 ## Encoding Embedded Data
 
-In your data production pipeline, you can use the encoding steps to convert your file to a bytestring. This guide demonstrates how to encode a file (e.g., skymap.fits) into a `base64` encoded string and send it to a Kafka producer.
+For producer data production pipelines, the following encoding steps convert an input file to a bytestring. This guide demonstrates how to encode a file (e.g., skymap.fits) into a `base64` encoded string and submit it to the GCN Kafka broker.
 
 ```python
 from gcn_kafka import Producer
