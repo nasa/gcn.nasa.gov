@@ -200,7 +200,7 @@ for message in consumer.consume(timeout=1):
 
 ## Decoding Embedded Data
 
-The following code demonstrates how to process a Kafka message containing a `base64` encoded skymap, decode it, and save it as a `.fits` file. Python's built-in [`base64`](https://docs.python.org/3/library/base64.html#base64.b64encode) module provides the `b64decode` method to make this task simple. JSON serialization uses Unicode, can handle a wide range of characters, enabling reliable handling of encoded data.
+The following code demonstrates how to process a Kafka message containing a `base64` encoded sky map, decode it, and save it as a `.fits` file. Python's built-in [`base64`](https://docs.python.org/3/library/base64.html#base64.b64encode) module provides the `b64decode` method to make this task simple. JSON serialization uses Unicode, can handle a wide range of characters, enabling reliable handling of encoded data.
 
 ```python
 import base64
