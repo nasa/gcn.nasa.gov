@@ -266,4 +266,4 @@ producer.produce(
 producer.flush()
 ```
 
-See [non-JSON data](https://json-schema.org/understanding-json-schema/reference/non_json_data.html) for more information.
+JSON Schema supports embedding non-JSON media within strings by leveraging the `contentMediaType` and `contentEncoding` keywords, which enable the distribution of diverse data types. For further details, refer to [non-JSON data](https://json-schema.org/understanding-json-schema/reference/non_json_data.html).
