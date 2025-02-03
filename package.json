@@ -102,7 +102,7 @@
     "@remix-run/dev": "~2.15.3",
     "@remix-run/eslint-config": "~2.15.3",
     "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.1.0",
+    "@testing-library/react": "^16.2.0",
     "@trivago/prettier-plugin-sort-imports": "^4.2.1",
     "@types/color-convert": "^2.0.4",
     "@types/diff": "^6.0.0",
