@@ -218,8 +218,8 @@ skymap_string = value_json["event"]["skymap"]
 decoded_bytes = base64.b64decode(skymap_string)
 
 # Save the decoded data as a FITS file
-with open("skymap.fits", "wb") as fitsFile:
-    fitsFile.write(decoded_bytes)
+with open("skymap.fits", "wb") as fits_file:
+    fits_file.write(decoded_bytes)
 ```
 
 If you want to include a FITS file in a Notice, you add a property to your schema definition in the following format:
