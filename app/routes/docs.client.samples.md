@@ -176,7 +176,8 @@ from gcn_kafka import Consumer
 import json
 
 # Connect as a Kafka consumer
-consumer = Consumer(client_id='fill me in', # Replace with your client ID
+consumer = Consumer(
+    client_id='fill me in', # Replace with your client ID
     client_secret='fill me in',             # Replace with your client secret
     config={"message.max.bytes": 204194304},
 )
