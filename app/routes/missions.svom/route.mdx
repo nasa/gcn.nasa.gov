@@ -1,0 +1,67 @@
+---
+handle:
+  breadcrumb: SVOM
+---
+
+import logo from './logo_svom_black.svg'
+
+# Space Variable Objects Monitor (SVOM)
+
+<img
+  src={logo}
+  align="right"
+  width="818"
+  height="780"
+  alt="SVOM logo"
+  className="grid-col-6 mobile-lg:grid-col-4 tablet:grid-col-2 desktop:grid-col-3 height-auto"
+/>
+
+**Launch Date:** June 22, 2024
+
+**Anticipated Start of Science Operations:** December 2024
+
+**End of Operations:** Mission duration of 3 years
+
+**Data Archive:**
+[HEASARC SVOM Archive](https://heasarc.gsfc.nasa.gov/docs/heasarc/missions/svom.html)
+
+The [Space-based multi-band astronomical Variable Objects Monitor (SVOM)](https://www.svom.eu/en/the-svom-mission/) is a French-Chinese mission, result of a collaboration between the two national space agencies, [China National Space Administration (CNSA)](https://www.cnsa.gov.cn/english/index.html) and [Centre national d'études spatiales (CNES)](https://cnes.fr/en/projects/svom). SVOM mission is dedicated to the study of the the most powerful transient phenomena, with a particular emphasis on gamma-ray bursts (GRBs).
+
+The SVOM spacecraft carries four multi-wavelength instruments: ECLAIRs, Gamma Ray burst Monitor (GRM), Microchannel X-ray Telescope (MXT) and Visual Telescope (VT). ECLAIRs and GRM can detect gamma-ray transient sources in real-time with localisation capabilities for ECLAIRs. SVOM can transfer the alerts in near real-time with a typical latency of less than 30s and perform autonomous slew to allow x-ray and optical follow-up of the source with the smaller field of view instruments: MXT and VT.
+
+ <div className="overflow-table">
+
+| Instruments | Energy Range                                           | Field of View | Localization                                  |
+| ----------- | ------------------------------------------------------ | ------------- | --------------------------------------------- |
+| ECLAIRs     | 4 - 250 keV                                            | 2 ster        | ~8ʹ radius (statistical, 90% confidence)      |
+| GRM         | 15 - 5000 keV                                          | 2.6 ster      | ~1-10° radius (statistical, 90% confidence)   |
+| MXT         | 0.2 - 10 keV                                           | 1.1° x 1.1°   | ~10-100ʺ radius (statistical, 90% confidence) |
+| VT          | 450 - 650 nm (Blue band) <br/>650 - 1000 nm (Red band) | 26ʹ x 26'     | ~1ʺ radius (statistical, 90% confidence)      |
+
+ </div>
+
+#### JSON-Serialized GCN Notice Types in GCN Kafka
+
+SVOM distributes alerts and localizations of gamma-ray burst and other transients. For now, these notices are published only in VOEvent format through the GCN Kafka topics prfixed `gcn.notices.svom.voevent`. Support in the JSON format will be available as soon as possible.
+As SVOM is at the beginning of its operationnal phase, only the first alerts from GRM, ECLAIRs and MXT are available, see table below:
+
+ <div className="overflow-table">
+
+| kafka topic                                       | Contents                                                                                        | Latency         |
+| ------------------------------------------------- | ----------------------------------------------------------------------------------------------- | --------------- |
+| `gcn.notices.svom.voevent.grm`                    | GRM trigger with possible raw localization                                                      | ~10 sec         |
+| `gcn.notices.svom.voevent.eclairs.trigger.wakeup` | ECLAIRs localization of a potential burst, can be updated once with slew status of the platform | ~10 sec - 1 min |
+| `gcn.notices.svom.voevent.mxt`                    | MXT localization of a found counterpart (only if platform slew), can be updated up to 3 times   | ~5 min          |
+
+ </div>
+
+#### Yearly Trigger Rates
+
+ <div className="overflow-table">
+
+| Instrument | Type                       | Yearly Rates |
+| ---------- | -------------------------- | ------------ |
+| ECLAIRs    | GRBs, and other transients | 50 GRBs/yr   |
+| GRM        | GRBs, and other transients | 90 GRBs/yr   |
+
+ </div>
