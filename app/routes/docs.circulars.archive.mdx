@@ -19,6 +19,27 @@ You can search the Circulars Archive by keywords or phrases in the subject, body
 
 You can also filter search results by submission date. Select the dropdown button labeled "Filter by date". From there, you can either select from a number of predefined time ranges (e.g., "Last Hour", "Last Day", etc.) or specify a custom date range, which can either be set as a start date, an end date, or both. All search filters can be cleared by clicking the 'x' button in the search bar.
 
+## Group View
+
+The Circulars archive provides a Group View that allows users to view all Circulars associated with a particular astronomical event. This is enabled by the eventID and Synonym Groups features.
+
+Each Circular is automatically assigned an `eventID` derived from the `Subject` field (e.g. GRB 250109A, EP250109a). This assignment is done by matching against the following regular expressions list:
+REGEX from circulars.lib.ts
+
+The `eventID` is listed in the JSON format version of Circulars. The first eventID used in the subject is associated automatically, and all Circulars with the same eventID are in a Synonym Group. GCN moderators can associate multiple eventIDs to Synonym Groups, such that all Circulars with these eventIDs will be listed in the same viewed group.
+
+### Adding events to the same synonym group
+
+GCN Team moderators can create or modify synonym groups. If you would like to suggest the creation or modification of a synonym group, submit a ticket via [the contact form](/support).
+
+### Searching by eventID
+
+In either Group View or the Circulars Archive search bar, you type in an eventID and it will take you to the associated Synonym Group. It will recognize regular expressions associated with the `eventID` (e.g. GRB 123456A, GRB123456A, 123456A).
+
+### Linking to an eventID or Synonym Group
+
+To save a direct link to all Circulars assocaited with a particular `eventID` or Synonym Group, you can point to any `eventID` in that group, e.g. `https://gcn.nasa.gov/circulars/group/[eventID]'.
+
 ## Citing GCN Circulars
 
 The [SAO/NASA Astrophysics Data System (ADS)](https://ui.adsabs.harvard.edu) ingests and indexes all GCN Circulars. You can use ADS to get bibliographic records for GCN Circulars to cite them in a publication.
