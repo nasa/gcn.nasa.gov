@@ -1,0 +1,95 @@
+---
+handle:
+  breadcrumb: SVOM
+---
+
+import logo from './logo_svom_black.svg'
+
+# Space-based multi-band astronomical Variable Objects Monitor (SVOM)
+
+<img
+  src={logo}
+  align="right"
+  width="818"
+  height="780"
+  alt="SVOM logo"
+  className="grid-col-6 mobile-lg:grid-col-4 tablet:grid-col-2 desktop:grid-col-3 height-auto"
+/>
+
+**Launch Date:** June 22, 2024
+
+**Anticipated Start of Science Operations:** February 2025
+
+**End of Operations:** Mission duration of 3 years
+
+**Notices Archive:** [SVOM French Science Center](https://fsc.svom.org/alerts)
+
+The [Space-based multi-band astronomical Variable Objects Monitor (SVOM)](https://www.svom.eu/en/the-svom-mission/) is a French-Chinese mission, result of a collaboration between the two national space agencies, [China National Space Administration (CNSA)](https://www.cnsa.gov.cn/english/index.html) and [Centre national d'études spatiales (CNES)](https://cnes.fr/en/projects/svom). SVOM mission is dedicated to the study of the most powerful transient phenomena, with a particular emphasis on gamma-ray bursts (GRBs).
+
+The SVOM spacecraft carries four multi-wavelength instruments: ECLAIRs, Gamma Ray burst Monitor (GRM), Microchannel X-ray Telescope (MXT) and Visual Telescope (VT). ECLAIRs and GRM can detect gamma-ray transient sources in real-time with localisation capabilities for ECLAIRs. SVOM can transfer the alerts in near real-time with a typical latency of less than 30s and perform autonomous slew to allow x-ray and optical follow-up of the source with the smaller field of view instruments: MXT and VT.
+
+ <div className="overflow-table">
+
+| <small> Instruments </small> | <small> Energy Range </small>                                          | <small> Field of View </small> | <small> Localization </small>                               |
+| ---------------------------- | ---------------------------------------------------------------------- | ------------------------------ | ----------------------------------------------------------- |
+| <small> ECLAIRs </small>     | <small> 4 - 250 keV </small>                                           | <small> 2 ster </small>        | <small> ~10ʹ radius (statistical + systematic) </small>     |
+| <small> GRM </small>         | <small> 15 - 5000 keV </small>                                         | <small> 2.6 ster </small>      | <small> ~10 degrees </small>                                |
+| <small> MXT </small>         | <small> 0.2 - 10 keV </small>                                          | <small> 1.1° x 1.1° </small>   | <small> ~10-100ʺ radius (statistical + systematic) </small> |
+| <small> VT </small>          | <small> 450 - 650 nm (Blue band) <br/>650 - 1000 nm (Red band)</small> | <small> 26ʹ x 26' </small>     | <small> ~1ʺ radius </small>                                 |
+
+ </div>
+
+#### GCN Kafka topics
+
+SVOM distributes alerts and localizations of gamma-ray burst and other transients. For now, these notices are published only in VOEvent format through the GCN Kafka topics prefixed `gcn.notices.svom.voevent`.
+
+Each of the 4 instruments have their dedicated topics to stream notices with their related information, see table below:
+
+ <div className="overflow-table">
+
+| <small> Kafka topic </small>                        | <small> Notice types </small>                                                            |
+| --------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| <small> `gcn.notices.svom.voevent.grm` </small>     | <small> `grm-trigger` </small>                                                           |
+| <small> `gcn.notices.svom.voevent.eclairs` </small> | <small> `eclairs-wakeup` <br/>`eclairs-catalog`<br/ > `slewing` / `not-slewing` </small> |
+| <small> `gcn.notices.svom.voevent.mxt` </small>     | <small> `mxt-initial` <br/>`mxt-update` </small>                                         |
+| <small> `gcn.notices.svom.voevent.vt` </small>      | <small> <b>Available soon</b> </small>                                                   |
+
+ </div>
+
+#### VOEvent XML-serialized GCN notice types
+
+ <div className="overflow-table">
+
+| <small> Notice Type </small>                               | <small> Content </small>                                                            | <small> Latency </small>      |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------- |
+| <small> `grm-trigger` </small>                             | <small> GRM trigger notice with possible rough localization </small>                | <small> ~15 sec</small>       |
+| <small> `eclairs-wakeup` </small>                          | <small> ECLAIRs localisation of a GRB candidate </small>                            | <small> ~15 sec</small>       |
+| <small> `eclairs-catalog` </small>                         | <small> ECLAIRs localisation of a flaring source of the on-board catalogue </small> | <small> ~15 sec</small>       |
+| <small> `slewing` /<br/>`not-slewing` <sup>1</sup></small> | <small> Platform slew status and target coordinates </small>                        | <small> ~1-8&nbsp;min</small> |
+| <pre><small>`mxt-initial_qf#`<sup>2</sup></small></pre>    | <small> MXT localisation of a found counterpart (only if platform slews) </small>   | <small> ~3 min </small>       |
+| <pre><small>`mxt-update_qf#`<sup>2</sup></small></pre>     | <small> MXT updated localisation (qf > mxt-initial_qf) </small>                     | <small> ~3 min </small>       |
+
+ </div>
+
+<sup>1</sup> <small>`not-slewing`</small> are published either if the detection
+did not reach the slew threshold (in a maximum time window of 8 min) or if the
+slew was not possible. The reason is specified in the notice parameters.
+
+<sup>2</sup> the value of the quality factor <small>`qf`</small> indicates the accuracy
+of the localisation:
+ - <small>`qf1`</small> &#8594; 120'' < R90 < 300''<br/>
+ - <small>`qf2`</small> &#8594; 60'' < R90 < 120''<br/>
+ - <small>`qf3`</small> &#8594; 30'' < R90 < 60''<br/>
+ - <small>`qf4`</small> &#8594; R90 < 30''<br/>
+<br/>
+
+#### Yearly Trigger Rates
+
+ <div className="overflow-table">
+
+| <small> Instrument</small> | <small> Type </small> | <small> Yearly Rates</small> |
+| -------------------------- | --------------------- | ---------------------------- |
+| <small> ECLAIRs </small>   | <small> GRBs </small> | <small> 60 GRBs/yr </small>  |
+| <small> GRM </small>       | <small> GRBs </small> | <small> 130 GRBs/yr </small> |
+
+ </div>
