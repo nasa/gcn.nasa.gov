@@ -30,6 +30,31 @@ import { Anchor } from '~/components/Anchor'
     <CollectionItem
       className="maxw-none grid-container"
       variantComponent={
+        <CollectionCalendarDate datetime={'January 31, 2025'} />
+      }
+    >
+      <CollectionHeading headingLevel="h3">
+        <Anchor>  Circulars over Kafka EventID Backfill, Planned Retirement of VOEvent Brokers, New Code Samples</Anchor>
+      </CollectionHeading>
+      <CollectionDescription>
+        #### Circulars over Kafka EventID Backfill
+          In preparation for new search and sort features in the GCN Circulars archive, we will be backfilling the automatically assigned eventID (e.g. GRB YYMMDDA) derived from each GCN Circular subject. EventIDs have been included in all JSON versions of Circulars starting with GCN Circ 37912.  The backfill of all prior Circulars will result in the following behavior that may impact some users:
+          - a revision of each Circular will lead to a new version in the archive, with the only change as adding the JSON eventID
+          - ~38k Circular revision will be distributed over Kafka
+          - revised Circulars will not be redistributed over email
+        The eventID backfill will be done in batches beginning on DATE.
+        #### Planned Retirement of VOEvent Brokers
+          The result of the November 2024 user survey of those utilizing the GCN VOEvent Brokers to receive VOEvent-format Notices with the VOEvent Transport Protocol is overwhelmingly in favor of retiring the brokers and users migrating to receive VOEvent Notices over Kafka.  This service is already available for all GCN Classic Notice types with self-subscription via the [Start Streaming Notices Guide](/quickstart).  The [GCN Classic VOEvent brokers](https://gcn.gsfc.nasa.gov/voevent.html) will be retired shortly after the conclusion of the O4 gravitational wave network observing run, [currently scheduled for June 9, 2025](https://observing.docs.ligo.org/plan/). We recommend the following actions for users currently utilizing VOEvent via GCN Classic.
+            - Sign up to receive VOEvent format Notices via [Kafka or email](/docs/notices/consuming)
+            - [Let the GCN Team know](/contact) when you're ready to unsubscribe from receiving them via the GCN Classic brokers.  All GCN Classic VOEvent subscribers will be unsubscribed after the end of O4 and the brokers will be taken offline.
+        #### New Parsing and HEALPix Code Samples
+          The GCN team has created new [Python code samples](/docs/samples) to aid users in setting up their scripts to consume GCN Notices (both GCN Classic legacy formats and new JSON format), and utilize HEALPix localization probability maps. We welcome [contributions](/docs/contributing) of additional code samples that would be useful for other GCN users.
+      </CollectionDescription>
+    </CollectionItem>
+
+    <CollectionItem
+      className="maxw-none grid-container"
+      variantComponent={
         <CollectionCalendarDate datetime={'January 7, 2025'} />
       }
     >
