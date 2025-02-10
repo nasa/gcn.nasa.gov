@@ -57,7 +57,7 @@
     "lucene": "^2.1.1",
     "mailparser": "^3.6.5",
     "memoizee": "^0.4.15",
-    "nodemailer": "^6.9.16",
+    "nodemailer": "^6.10.0",
     "openid-client": "^5.6.1",
     "pretty-bytes": "^6.1.1",
     "react": "^18.2.0",
