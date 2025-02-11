@@ -1,0 +1,38 @@
+---
+handle:
+  breadcrumb: Missions, Instruments, and Facilities
+---
+
+import { WithFeature } from '~/root'
+
+# Missions, Instruments, and Facilities
+
+Observatories that generate GCN notices for transient alerts, as consumed by the science community. Explore mission resources and GCN notice details in the menu.
+
+| Mission                                                          | Status      | GCN Classic                                                                 | GCN Kafka                                    |
+| ---------------------------------------------------------------- | ----------- | --------------------------------------------------------------------------- | -------------------------------------------- |
+| [AGILE](missions/agile)                                          | Archival    | [Available](https://gcn.gsfc.nasa.gov/agile_grbs.html)                      |                                              |
+| [BurstCube](missions/burstcube)                                  | Archival    |                                                                             | Planned, but never distributed during flight |
+| [CALET](missions/calet)                                          | Operational | [Available](https://gcn.gsfc.nasa.gov/calet_triggers.html)                  |                                              |
+| {WithFeature('CHIME') ? 'CHIME' : '[CHIME](missions/chime)'}     | Onboarding  |                                                                             | In development                               |
+| [Einstein Probe](missions/ep)                                    | Operational |                                                                             | Available                                    |
+| [Fermi](missions/fermi)                                          | Operational | [Available](https://gcn.gsfc.nasa.gov/fermi_grbs.html)                      | In development                               |
+| [GECAM](missions/gecam)                                          | Operational | [Available](https://gcn.gsfc.nasa.gov/gecam_events.html)                    |                                              |
+| [HAWC](missions/hawc)                                            | Operational | [Available](https://gcn.gsfc.nasa.gov/amon_hawc_events.html)                |                                              |
+| [IceCube](missions/icecube)                                      | Operational | [Available](https://gcn.gsfc.nasa.gov/amon_icecube_gold_bronze_events.html) | Available (Partial)                          |
+| [INTEGRAL](missions/integral)                                    | Operational | [Available](https://gcn.gsfc.nasa.gov/integral_spiacs.html)                 |                                              |
+| {WithFeature('KM3NET') ? 'KM3NeT' : '[KM3NeT](missions/km3net)'} | Onboarding  |                                                                             | In development                               |
+| [KONUS](missions/konus)                                          | Operational | [Available](https://gcn.gsfc.nasa.gov/konus_grbs.html)                      |                                              |
+| [LIGO/Virgo/KAGRA](missions/lvk)                                 | Operational | [Available](https://gcn.gsfc.nasa.gov/lvc_events.html)                      | Available                                    |
+| [MAXI](missions/maxi)                                            | Operational | [Available](https://gcn.gsfc.nasa.gov/maxi_grbs.html)                       |                                              |
+| [MOA](missions/moa)                                              | Uncertain   | [Available](https://gcn.gsfc.nasa.gov/moa_events.html)                      |                                              |
+| [SNEWS](missions/snews)                                          | Operational | [Available](https://gcn.gsfc.nasa.gov/snews_trans.html)                     |                                              |
+| [Super-Kamiokande](missions/sksn)                                | Operational | [Available](https://gcn.gsfc.nasa.gov/sk_sn_events.html)                    | In development                               |
+| [Swift](missions/swift)                                          | Operational | [Available](https://gcn.gsfc.nasa.gov/swift_grbs.html)                      | Available (Partial) and In development       |
+| {WithFeature('SVOM') ? 'SVOM' : '[SVOM](missions/svom)'}         | Operational |                                                                             | In development (VOEvent Only)                |
+
+Notes:
+
+- All GCN Classic Notice types are available via [email or Kafka](docs/notices/consuming).
+- All new missions Notices are only available via GCN Kafka in JSON and/or VOEvent format.
+- In Development indicates either onboarding missions or active missions that are in the process of developing GCN Kafka Notices while maintaining GCN Classic Notices.

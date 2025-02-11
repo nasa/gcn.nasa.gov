@@ -8,7 +8,7 @@
 import { NavLink, Outlet } from '@remix-run/react'
 import { GridContainer } from '@trussworks/react-uswds'
 
-import { SideNav } from '~/components/SideNav'
+import { SideNav, SideNavSub } from '~/components/SideNav'
 import { useFeature } from '~/root'
 import type { BreadcrumbHandle } from '~/root/Title'
 
@@ -23,12 +23,6 @@ export default function () {
             items={[
               <NavLink key="." to="." end>
                 Missions, Instruments, and Facilities
-              </NavLink>,
-              <NavLink key="agile" to="agile">
-                AGILE
-              </NavLink>,
-              <NavLink key="burstcube" to="burstcube">
-                BurstCube
               </NavLink>,
               <NavLink key="calet" to="calet">
                 CALET
@@ -82,6 +76,27 @@ export default function () {
               <NavLink key="sksn" to="sksn">
                 Super-Kamiokande
               </NavLink>,
+              useFeature('SVOM') && (
+                <NavLink key="svom" to="svom">
+                  SVOM
+                </NavLink>
+              ),
+              <>
+                <NavLink key="archival" to="archival">
+                  Archival
+                </NavLink>
+                <SideNavSub
+                  base="archival"
+                  items={[
+                    <NavLink key="agile" to="agile">
+                      AGILE
+                    </NavLink>,
+                    <NavLink key="burstcube" to="burstcube">
+                      BurstCube
+                    </NavLink>,
+                  ]}
+                />
+              </>,
             ]}
           />
         </div>
