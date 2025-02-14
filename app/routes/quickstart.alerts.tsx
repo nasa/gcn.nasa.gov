@@ -28,8 +28,6 @@ export default function () {
   const defaultFormat = (params.get('format') as NoticeFormat) || undefined
   const [format, setFormat] = useState<NoticeFormat>(defaultFormat ?? 'text')
 
-  console.log(alerts)
-
   return (
     <Form method="GET" action="../code">
       <p className="usa-paragraph">
