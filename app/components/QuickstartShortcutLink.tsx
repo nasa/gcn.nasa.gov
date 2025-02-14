@@ -26,7 +26,7 @@ export default function QuickstartShortcutLink({
     <Link
       to={`/quickstart/alerts?clientId=${WithCredentials()}&format=${format}${selectedAlerts}`}
     >
-      Stream Now
+      Kafka Stream
     </Link>
   )
 }
