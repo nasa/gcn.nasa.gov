@@ -56,6 +56,7 @@ import {
   moderatorGroup,
   submitterGroup,
 } from './routes/circulars/circulars.server'
+import { ClientCredentialVendingMachine } from './routes/user.credentials/client_credentials.server'
 
 import highlightStyle from 'highlight.js/styles/github.css'
 // FIXME: no top-level await, no import function
@@ -119,6 +120,13 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const recaptchaSiteKey = getEnvOrDieInProduction('RECAPTCHA_SITE_KEY')
   const userIsMod = user?.groups.includes(moderatorGroup)
   const userIsVerifiedSubmitter = user?.groups.includes(submitterGroup)
+  let publicConsumerCredential
+  if (user) {
+    const machine = await ClientCredentialVendingMachine.create(request)
+    publicConsumerCredential = (await machine.getClientCredentials())?.find(
+      (x) => x.scope == 'gcn.nasa.gov/kafka-public-consumer'
+    )?.client_id
+  }
 
   return {
     origin,
@@ -129,6 +137,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     idp,
     userIsMod,
     userIsVerifiedSubmitter,
+    publicConsumerCredential,
   }
 }
 
@@ -163,6 +172,10 @@ export function useSubmitterStatus() {
 
 export function useRecaptchaSiteKey() {
   return useLoaderDataRoot()?.recaptchaSiteKey
+}
+
+export function WithCredentials() {
+  return useLoaderDataRoot()?.publicConsumerCredential
 }
 
 /**

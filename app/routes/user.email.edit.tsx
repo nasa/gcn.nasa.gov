@@ -11,7 +11,7 @@ import {
   type LoaderFunctionArgs,
   redirect,
 } from '@remix-run/node'
-import { Form, Link, useLoaderData } from '@remix-run/react'
+import { Form, Link, useLoaderData, useSearchParams } from '@remix-run/react'
 import {
   Button,
   ButtonGroup,
@@ -115,14 +115,20 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export default function () {
+  const [params] = useSearchParams()
   const { notification, format } = useLoaderData<typeof loader>()
   const defaultNameValid = Boolean(notification.name)
   const [nameValid, setNameValid] = useState(defaultNameValid)
   const defaultRecipientValid = Boolean(notification.recipient)
   const [recipientValid, setRecipientValid] = useState(defaultRecipientValid)
+  const alerts = params.getAll('alerts') || undefined
+  const defaultAlerts =
+    notification.noticeTypes.length > 0 ? notification.noticeTypes : alerts
   const [alertsValid, setAlertsValid] = useState(false)
   const [recaptchaValid, setRecaptchaValid] = useState(!useRecaptchaSiteKey())
-  const [defaultFormat, setFormat] = useState<NoticeFormat>(format)
+  const [defaultFormat, setFormat] = useState<NoticeFormat>(
+    (params.get('format') as NoticeFormat) ?? format
+  )
 
   return (
     <Form method="POST">
@@ -173,7 +179,7 @@ export default function () {
       <Label htmlFor="noticeTypes">Types</Label>
       <NoticeTypeCheckboxes
         selectedFormat={defaultFormat}
-        defaultSelected={notification.noticeTypes}
+        defaultSelected={defaultAlerts}
         validationFunction={setAlertsValid}
       />
       <ReCAPTCHA

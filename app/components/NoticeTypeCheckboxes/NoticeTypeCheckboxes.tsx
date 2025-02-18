@@ -44,7 +44,7 @@ function humanizedRate(rate: number, singular: string, plural?: string) {
   return `${isUpperBound ? '< ' : ''}${humanizedCount(Math.round(rate), singular, plural)} per ${unit}`
 }
 
-const NoticeTypes = {
+export const NoticeTypes: { [key: string]: string[] } = {
   AGILE: [
     'AGILE_GRB_GROUND',
     'AGILE_GRB_POS_TEST',
@@ -193,7 +193,7 @@ const NoticeTypeLinks: { [key: string]: string | undefined } = {
   Other: undefined,
 }
 
-const JsonNoticeTypes: { [key: string]: string[] } = {
+export const JsonNoticeTypes: { [key: string]: string[] } = {
   Circulars: ['gcn.circulars'],
   Heartbeat: ['gcn.heartbeat'],
   IceCube: ['gcn.notices.icecube.lvk_nu_track_search'],

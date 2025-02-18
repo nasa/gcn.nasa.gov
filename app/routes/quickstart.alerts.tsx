@@ -22,9 +22,11 @@ export const handle: BreadcrumbHandle & SEOHandle = {
 
 export default function () {
   const [params] = useSearchParams()
+  const alerts = params.getAll('alerts') || undefined
   const [alertsValid, setAlertsValid] = useState(false)
   const clientId = params.get('clientId') || undefined
-  const [format, setFormat] = useState<NoticeFormat>('text')
+  const defaultFormat = (params.get('format') as NoticeFormat) || undefined
+  const [format, setFormat] = useState<NoticeFormat>(defaultFormat ?? 'text')
 
   return (
     <Form method="GET" action="../code">
@@ -46,6 +48,7 @@ export default function () {
       />
       <Label htmlFor="noticeTypes">Notice Type</Label>
       <NoticeTypeCheckboxes
+        defaultSelected={alerts}
         selectedFormat={format}
         validationFunction={setAlertsValid}
       />
