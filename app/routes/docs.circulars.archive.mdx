@@ -5,6 +5,8 @@ handle:
 
 import { Link } from '@remix-run/react'
 
+import { WithFeature } from '~/root'
+
 # Circulars Archive
 
 Upon successful submission and distribution, a GCN Circular is assigned a number and stored permanently in the [GCN Circulars archive](/circulars). The archive lists links to the full text of every GCN Circular in reverse chronological order. The archive has a full-text search feature that you can use to find all Circulars that contain a phrase or keyword.
@@ -18,6 +20,31 @@ Upon successful submission and distribution, a GCN Circular is assigned a number
 You can search the Circulars Archive by keywords or phrases in the subject, body, and submitter fields. By default, results will be returned in reverse chronological order, but you can also choose to sort the results by relevance. You can navigate through the search results using pagination controls and specify the number of results to display per page. By default, 100 results are displayed per page.
 
 You can also filter search results by submission date. Select the dropdown button labeled "Filter by date". From there, you can either select from a number of predefined time ranges (e.g., "Last Hour", "Last Day", etc.) or specify a custom date range, which can either be set as a start date, an end date, or both. All search filters can be cleared by clicking the 'x' button in the search bar.
+
+You can also type in a specific Circular ID (e.g. 12345) and it will list that Circular. Note that GRB names without a letter can be interpreted as Circular IDs.
+
+<WithFeature SYNONYMS>
+  ## Event View
+
+The Circulars archive provides an Event View that allows users to view all Circulars associated with a particular astronomical event. This is enabled by the eventID and Synonym Groups features.
+
+Each Circular is automatically assigned an `eventID` derived from the `Subject` field (e.g. GRB 250109A, EP250109a). This assignment is done by matching against a regular expressions list.
+
+The `eventID` is listed in the JSON format version of Circulars. The first eventID used in the subject is associated automatically, and all Circulars with the same eventID are in a Synonym Group. GCN moderators can associate multiple eventIDs to Synonym Groups, such that all Circulars with these eventIDs will be listed in the same group.
+
+### Adding events to the same synonym group
+
+GCN Team moderators can create or modify synonym groups. If you would like to suggest the creation or modification of a synonym group, submit a ticket via [the contact form](/support).
+
+### Searching by eventID
+
+In the Event View search bar, enter in an eventID and it will take you to the associated Synonym Group. It will recognize regular expressions associated with the `eventID` (e.g. GRB 123456A, GRB123456A, 123456A).
+
+### Linking to an eventID or Synonym Group
+
+To save a direct link to all Circulars assocaited with a particular `eventID` or Synonym Group, you can point to any `eventID` in that group, e.g. `https://gcn.nasa.gov/circulars/group/[eventID]'.
+
+</WithFeature>
 
 ## Citing GCN Circulars
 

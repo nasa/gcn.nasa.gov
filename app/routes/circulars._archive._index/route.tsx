@@ -222,6 +222,7 @@ export default function () {
   const [inputQuery, setInputQuery] = useState(query)
   const viewState = isGroupView ? 'Index' : 'Group'
   const clean = inputQuery === query
+  const searchText = isGroupView ? 'Event Name' : 'Search'
 
   return (
     <>
@@ -267,8 +268,8 @@ export default function () {
             id="query"
             name="query"
             type="search"
+            placeholder={searchText}
             defaultValue={inputQuery}
-            placeholder="Search"
             aria-describedby="searchHint"
             onChange={({ target: { form, value } }) => {
               setInputQuery(value)
@@ -314,12 +315,20 @@ export default function () {
           />
         )}
       </ToolbarButtonGroup>
-      <Hint id="searchHint">
-        Search for Circulars by submitter, subject, or body text (e.g. 'Fermi
-        GRB'). <br />
-        To navigate to a specific circular, enter the associated Circular ID
-        (e.g. 'gcn123', 'Circular 123', or '123').
-      </Hint>
+      {!isGroupView && (
+        <Hint id="searchHint">
+          Search for Circulars by submitter, subject, or body text (e.g. 'Fermi
+          GRB'). <br />
+          To navigate to a specific circular, enter the associated Circular ID
+          (e.g. 'gcn123', 'Circular 123', or '123').
+        </Hint>
+      )}
+      {isGroupView && (
+        <Hint id="searchHint">
+          Search for Event Groups by eventID (e.g. 'GRB 123456A', 'GRB123456A',
+          '123456A'). <br />
+        </Hint>
+      )}
       {useFeature('CIRCULARS_LUCENE') && <LuceneAccordion />}
       {clean && (
         <>
