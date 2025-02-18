@@ -1,0 +1,354 @@
+---
+handle:
+  breadcrumb: SVOM
+---
+
+import logo from './logo_svom_black.svg'
+
+# Space-based multi-band astronomical Variable Objects Monitor (SVOM)
+
+<img
+  src={logo}
+  align="right"
+  width="818"
+  height="780"
+  alt="SVOM logo"
+  className="grid-col-6 mobile-lg:grid-col-4 tablet:grid-col-2 desktop:grid-col-3 height-auto"
+/>
+
+**Launch Date:** June 22, 2024
+
+**Anticipated Start of Science Operations:** February 2025
+
+**End of Operations:** Mission duration of 3 years
+
+**Notices Archive:** [SVOM French Science Center](https://fsc.svom.org/alerts)
+
+The [Space-based multi-band astronomical Variable Objects Monitor (SVOM)](https://www.svom.eu/en/the-svom-mission/) is a French-Chinese mission, result of a collaboration between the two national space agencies, [China National Space Administration (CNSA)](https://www.cnsa.gov.cn/english/index.html) and [Centre national d'études spatiales (CNES)](https://cnes.fr/en/projects/svom). SVOM mission is dedicated to the study of the most powerful transient phenomena, with a particular emphasis on gamma-ray bursts (GRBs).
+
+The SVOM spacecraft carries four multi-wavelength instruments: ECLAIRs, Gamma Ray burst Monitor (GRM), Microchannel X-ray Telescope (MXT) and Visual Telescope (VT). ECLAIRs and GRM can detect gamma-ray transient sources in real-time with localisation capabilities for ECLAIRs. SVOM can transfer the alerts in near real-time with a typical latency of less than 30s and perform autonomous slew to allow x-ray and optical follow-up of the source with the smaller field of view instruments: MXT and VT.
+
+ <div className="overflow-table">
+
+| Instruments | Energy Range                                           | Field of View | Localization                               |
+| ----------- | ------------------------------------------------------ | ------------- | ------------------------------------------ |
+| ECLAIRs     | 4 - 250 keV                                            | 2 ster        | ~10ʹ radius (statistical + systematic)     |
+| GRM         | 15 - 5000 keV                                          | 2.6 ster      | ~10 degrees                                |
+| MXT         | 0.2 - 10 keV                                           | 1.1° x 1.1°   | ~10-100ʺ radius (statistical + systematic) |
+| VT          | 450 - 650 nm (Blue band) <br/>650 - 1000 nm (Red band) | 26ʹ x 26'     | ~1ʺ radius                                 |
+
+ </div>
+
+#### GCN Kafka topics
+
+SVOM distributes alerts and localizations of gamma-ray burst and other transients. For now, these notices are published only in VOEvent format through the GCN Kafka topics prefixed `gcn.notices.svom.voevent`.
+
+Each of the four instruments has its own dedicated topic to stream notices with their related information, see table below:
+
+ <div className="overflow-table">
+
+| Kafka topic                        | Notice types                                                            |
+| ---------------------------------- | ----------------------------------------------------------------------- |
+| `gcn.notices.svom.voevent.grm`     | `grm-trigger`                                                           |
+| `gcn.notices.svom.voevent.eclairs` | `eclairs-wakeup` <br/>`eclairs-catalog`<br/ > `slewing` / `not-slewing` |
+| `gcn.notices.svom.voevent.mxt`     | `mxt-initial` <br/>`mxt-update`                                         |
+| `gcn.notices.svom.voevent.vt`      | <b>Available soon</b>                                                   |
+
+ </div>
+
+#### VOEvent XML-serialized GCN notice types
+
+ <div className="overflow-table">
+
+| Notice Type                                | Content                                                            | Latency       |
+| ------------------------------------------ | ------------------------------------------------------------------ | ------------- |
+| `grm-trigger`                              | GRM trigger notice with possible rough localization                | ~15 sec       |
+| `eclairs-wakeup`                           | ECLAIRs localisation of a GRB candidate                            | ~15 sec       |
+| `eclairs-catalog`                          | ECLAIRs localisation of a flaring source from the on-board catalogue | ~15 sec       |
+| `slewing` /<br/>`not-slewing` <sup>1</sup> | Platform slew status and target coordinates                        | ~1-8&nbsp;min |
+| <pre>`mxt-initial_qf#`<sup>2</sup></pre>   | MXT localisation of a found counterpart (only if platform slews)   | ~3 min        |
+| <pre>`mxt-update_qf#`<sup>2</sup></pre>    | MXT updated localisation (qf > mxt-initial_qf)                     | ~3 min        |
+
+ </div>
+
+<sup>1</sup> `not-slewing`are published either if the detection did not reach
+the slew threshold (in a maximum time window of 8 min) or if the slew was not
+possible. The reason is specified in the notice parameters.
+
+<sup>2</sup> the value of the quality factor `qf` indicates the accuracy
+of the localisation:
+ - `qf1`&#8594; 120'' < R90 < 300''<br/>
+ - `qf2`&#8594; 60'' < R90 < 120''<br/>
+ - `qf3`&#8594; 30'' < R90 < 60''<br/>
+ - `qf4`&#8594; R90 < 30''<br/>
+
+#### VOEvent examples
+
+The complete list of published notices can be found [here](https://fsc.svom.org/alerts). Here are 3 different examples of SVOM VOEvent notices:
+
+<details>
+    <summary>`eclairs-wakeup`</summary>
+    ```xml
+    <?xml version='1.0' encoding='UTF-8'?>
+    <voe:VOEvent
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:voe="http://www.ivoa.net/xml/VOEvent/v2.0"
+      xsi:schemaLocation="http://www.ivoa.net/xml/VOEvent/v2.0 http://www.ivoa.net/xml/VOEvent/VOEvent-v2.0.xsd"
+      version="2.0"
+      role="observation"
+      ivorn="ivo://org.svom/fsc#sbYYMMDDnn_eclairs-wakeup">
+      <Who>
+        <AuthorIVORN>ivo://org.svom/FSC</AuthorIVORN>
+        <Author>
+            <title>SVOM French Science Center</title>
+            <shortName>FSC</shortName>
+            <contactName>Timothe Roland</contactName>
+            <contactEmail>svom-contact@cea.fr</contactEmail>
+        </Author>
+        <Date>2022-04-04T11:54:42</Date>
+      </Who>
+      <What>
+        <Param name="Packet_Type"  value="202"/>
+        <Param name="Pkt_Ser_Num"  value="1"/>
+        <Param name="Instrument"   value="ECLAIRs"  ucd="instr"/>
+        <Group name="Svom_Identifiers">
+          <Param name="Notice_Level"  value="N1e"         ucd="meta.code.class"/>
+          <Param name="Burst_Id"      value="sbYYMMDDnn"  ucd="meta.id"/>
+        </Group>
+        <Group name="Detection_Info">
+          <Param name="SNR"                value="6.58"  unit="sigma"     ucd="stat.snr"/>
+          <Param name="Time_Window_Start"  value="2022-04-04T11:54:30.2Z" ucd="time.start"/>
+          <Param name="Time_Window_End"    value="2022-04-04T11:54:32.2Z" ucd="time.end"/>
+          <Param name="Timescale"          value="2"     unit="s"         ucd="time.interval"/>
+          <Param name="Lower_Energy_Bound" value="4"     unit="keV"       ucd="em.energy"/>
+          <Param name="Upper_Energy_Bound" value="50"    unit="keV"       ucd="em.energy"/>
+          <Param name="Trigger_Type"       value="count_rate"             ucd="instr.param"/>
+        </Group>
+        <Group name="Target_Info">
+          <Param name="Galactic_Lon"  value="332.72"  unit="deg"  ucd="pos.galactic.lon"/>
+          <Param name="Galactic_Lat"  value="-21.46"  unit="deg"  ucd="pos.galactic.lat"/>
+          <Param name="Sun_Angle"     value="49.58"   unit="deg"  ucd="pos.angDistance"/>
+          <Param name="Moon_Angle"    value="128.6"   unit="deg"  ucd="pos.angDistance"/>
+        </Group>
+        <Group name="Satellite_Info">
+          <Param name="Slew_Status"          value="not_requested"       ucd="meta.code.status"/>
+          <Param name="Sat_Attitude_Ra"      value="2.36"    unit="deg"  ucd="pos.eq.ra"/>
+          <Param name="Sat_Attitude_Dec"     value="148.22"  unit="deg"  ucd="pos.eq.de"/>
+          <Param name="Sat_Attitude_Roll"    value="63.22"   unit="deg"  ucd="pos.posAng"/>
+          <Param name="Sat_Position_Lat"     value="39.97"   unit="deg"  ucd="pos.earth.lat"/>
+          <Param name="Sat_Position_Lon"     value="116.39"  unit="deg"  ucd="pos.earth.lon"/>
+          <Param name="Sat_Position_Height"  value="614"     unit="km"   ucd="pos.earth.altitude"/>
+        </Group>
+      </What>
+      <WhereWhen>
+        <ObsDataLocation>
+          <ObservatoryLocation id="GEOLEO"/>
+          <ObservationLocation>
+            <AstroCoordSystem id="UTC-FK5-GEO"/>
+            <AstroCoords coord_system_id="UTC-FK5-GEO">
+              <Time unit="s">
+                <TimeInstant>
+                  <ISOTime>2022-04-04T11:54:30.2</ISOTime>
+                </TimeInstant>
+              </Time>
+              <Position2D unit="deg">
+                <Name1>RA</Name1>
+                <Name2>Dec</Name2>
+                <Value2>
+                  <C1>50.4488</C1>
+                  <C2>10.0041</C2>
+                </Value2>
+                <Error2Radius>0.2</Error2Radius>
+              </Position2D>
+            </AstroCoords>
+          </ObservationLocation>
+        </ObsDataLocation>
+      </WhereWhen>
+      <Why importance="0.7">
+        <Inference probability="0.7">
+          <Concept>process.variation.burst;em.gamma</Concept>
+        </Inference>
+      </Why>
+      <How>
+        <Description>N1e notice, data from ECLAIRs instrument</Description>
+        <Reference uri="https://www.svom.eu/en/telescope-eclairs-en"/>
+      </How>
+    </voe:VOEvent>
+    ```
+</details>
+<br/>
+
+<details>
+    <summary>`grm-trigger`</summary>
+    ```xml
+    <?xml version="1.0" encoding="UTF-8"?>
+    <voe:VOEvent
+      xmlns:voe="http://www.ivoa.net/xml/VOEvent/v2.0"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.ivoa.net/xml/VOEvent/v2.0 http://www.ivoa.net/xml/VOEvent/VOEvent-v2.0.xsd"
+      version="2.0"
+      role="observation"
+      ivorn="ivo://org.svom/fsc#sb25020701_grm-trigger">
+      <Who>
+        <AuthorIVORN>ivo://org.svom/FSC</AuthorIVORN>
+        <Date>2025-02-07T07:14:22</Date>
+        <Author>
+          <title>SVOM French Science Center</title>
+          <shortName>FSC</shortName>
+          <contactName>Timothe Roland</contactName>
+          <contactEmail>svom-contact@cea.fr</contactEmail>
+        </Author>
+      </Who>
+      <What>
+        <Param name="Packet_Type"  value="201"  ucd="meta.id"/>
+        <Param name="Pkt_Ser_Num"  value="1"    ucd="meta.id"/>
+        <Param name="Instrument"   value="GRM"  ucd="instr"/>
+        <Group name="Svom_Identifiers">
+          <Param name="Notice_Level"  value="N1g"         ucd="meta.id"/>
+          <Param name="Burst_Id"      value="sb25020701"  ucd="meta.id"/>
+        </Group>
+        <Group name="Detection_Info">
+          <Param name="SNR"                value="9.20"   unit="sigma"      ucd="stat.snr"/>
+          <Param name="Timescale"          value="4.0"    unit="s"          ucd="time.interval"/>
+          <Param name="Time_Window_Start"  value="2025-02-07T07:14:06.000Z" ucd="time.start"/>
+          <Param name="Time_Window_End"    value="2025-02-07T07:14:10.000Z" ucd="time.end"/>
+          <Param name="Lower_Energy_Bound" value="14.23"  unit="keV"        ucd="em.energy"/>
+          <Param name="Upper_Energy_Bound" value="31.31"  unit="keV"        ucd="em.energy"/>
+          <Param name="Triggered_GRDs"     value="101"                      ucd="instr.param"/>
+        </Group>
+        <Group name="Satellite_Info">
+          <Param name="Attitude_Ra"    value="148.96"  unit="deg"  ucd="instr.param"/>
+          <Param name="Attitude_Dec"   value="-17.74"  unit="deg"  ucd="instr.param"/>
+          <Param name="Attitude_Roll"  value="194.06"  unit="deg"  ucd="instr.param"/>
+        </Group>
+      </What>
+      <WhereWhen>
+        <ObsDataLocation>
+          <ObservatoryLocation id="GEOLEO"/>
+          <ObservationLocation>
+            <AstroCoordSystem id="UTC-ICRS-GEO"/>
+            <AstroCoords coord_system_id="UTC-ICRS-GEO">
+              <Time unit="s">
+                <TimeInstant>
+                  <ISOTime>2025-02-07T07:14:06</ISOTime>
+                </TimeInstant>
+              </Time>
+            </AstroCoords>
+          </ObservationLocation>
+        </ObsDataLocation>
+      </WhereWhen>
+      <Why importance="0.61">
+        <Inference probability="0.61">
+          <Concept>process.variation.burst;em.gamma</Concept>
+        </Inference>
+      </Why>
+      <How>
+        <Description>N1g notice, data from GRM</Description>
+        <Reference uri="https://www.svom.eu/en/grm-gamma-ray-burst-monitor-en/"/>
+      </How>
+    </voe:VOEvent>
+```
+
+</details>
+<br/>
+
+<details>
+    <summary>`mxt-initial_qf1`</summary>
+    ```xml
+    <?xml version="1.0" encoding="UTF-8"?>
+    <voe:VOEvent
+      xmlns:voe="http://www.ivoa.net/xml/VOEvent/v2.0"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.ivoa.net/xml/VOEvent/v2.0 http://www.ivoa.net/xml/VOEvent/VOEvent-v2.0.xsd"
+      version="2.0"
+      role="observation"
+      ivorn="ivo://org.svom/fsc#sb25020504_mxt-initial_qf1">
+      <Who>
+        <AuthorIVORN>ivo://org.svom/FSC</AuthorIVORN>
+        <Date>2025-02-05T21:41:59</Date>
+        <Author>
+          <title>SVOM French Science Center</title>
+          <shortName>FSC</shortName>
+          <contactName>Timothe Roland</contactName>
+          <contactEmail>svom-contact@cea.fr</contactEmail>
+        </Author>
+      </Who>
+      <What>
+        <Param name="Packet_Type" value="209" ucd="meta.id"/>
+        <Param name="Pkt_Ser_Num" value="1"   ucd="meta.id"/>
+        <Param name="Instrument"  value="MXT" ucd="instr"/>
+        <Group name="Svom_Identifiers">
+          <Param name="Notice_Level"  value="N2m"        ucd="meta.id"/>
+          <Param name="Burst_Id"      value="sb25020504" ucd="meta.id"/>
+        </Group>
+        <Group name="Detection_Info">
+          <Param name="SNR"        value="92.00" unit="sigma"          ucd="stat.snr"/>
+          <Param name="Mean_Flux"  value="0.43"  unit="erg.cm^-2.s^-1" ucd="phot.flux"/>
+          <Param name="Flux_Error" value="0.66"  unit="erg.cm^-2.s^-1" ucd="phot.flux"/>
+        </Group>
+        <Group name="Target_Info">
+          <Param name="Within_ECLAIRs_R90" value="False"                ucd="instr.param"/>
+          <Param name="ECLAIRs_Angle"      value="2.46"   unit="arcmin" ucd="pos.angDistance"/>
+          <Param name="Galactic_Lon"       value="186.88" unit="deg"    ucd="pos.galactic.lon"/>
+          <Param name="Galactic_Lat"       value="22.52"  unit="deg"    ucd="pos.galactic.lat"/>
+          <Param name="Moon_Angle"         value="55.52"  unit="deg"    ucd="pos.angDistance"/>
+          <Param name="Sun_Angle"          value="151.19" unit="deg"    ucd="pos.angDistance"/>
+        </Group>
+        <Group name="Satellite_Info">
+          <Param name="Use_VT_Attitude" value="True"              ucd="instr.param"/>
+          <Param name="Attitude_Ra"     value="139.61" unit="deg" ucd="instr.param"/>
+          <Param name="Attitude_Dec"    value="16.30"  unit="deg" ucd="instr.param"/>
+          <Param name="Attitude_Roll"   value="344.09" unit="deg" ucd="instr.param"/>
+        </Group>
+      </What>
+      <WhereWhen>
+        <ObsDataLocation>
+          <ObservatoryLocation id="GEOLEO"/>
+          <ObservationLocation>
+            <AstroCoordSystem id="UTC-ICRS-GEO"/>
+            <AstroCoords coord_system_id="UTC-ICRS-GEO">
+              <Time unit="s">
+                <TimeInstant>
+                  <ISOTime>2025-02-05T21:34:31.974000</ISOTime>
+                </TimeInstant>
+              </Time>
+              <Position2D unit="deg">
+                <Name1>RA</Name1>
+                <Name2>Dec</Name2>
+                <Value2>
+                  <C1>113.4980</C1>
+                  <C2>32.3892</C2>
+                </Value2>
+                <Error2Radius>0.0356</Error2Radius>
+              </Position2D>
+            </AstroCoords>
+          </ObservationLocation>
+        </ObsDataLocation>
+      </WhereWhen>
+      <Why importance="1.00">
+        <Inference probability="1.00">
+          <Concept>process.variation.burst;em.gamma</Concept>
+        </Inference>
+      </Why>
+      <How>
+        <Description>N2m notice, data from MXT</Description>
+        <Reference uri="https://www.svom.eu/en/mxt-microchannel-x-ray-telescope-en/"/>
+      </How>
+      <Citations>
+        <EventIVORN cite="followup">ivo://org.svom/fsc#sb25020504_eclairs-refined</EventIVORN>
+        <EventIVORN cite="followup">ivo://org.svom/fsc#sb25020504_slewing</EventIVORN>
+      </Citations>
+    </voe:VOEvent>
+    ```
+</details>
+
+#### Yearly Trigger Rates
+
+ <div className="overflow-table">
+
+| Instrument | Type | Yearly Rates |
+| ---------- | ---- | ------------ |
+| ECLAIRs    | GRBs | 60 GRBs/yr   |
+| GRM        | GRBs | 130 GRBs/yr  |
+
+ </div>
