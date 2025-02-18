@@ -30,6 +30,31 @@ import { Anchor } from '~/components/Anchor'
     <CollectionItem
       className="maxw-none grid-container"
       variantComponent={
+        <CollectionCalendarDate datetime={'February 18, 2025'} />
+      }
+    >
+      <CollectionHeading headingLevel="h3">
+        <Anchor>  SVOM Notices</Anchor>
+      </CollectionHeading>
+      <CollectionDescription>
+        #### SVOM VOEvent Notices Available Over Kafka
+          The SVOM Team and the GCN team are pleased to announce the availability of SVOM notice types via the [new GCN](https://gcn.nasa.gov) in VOEvent format.  These notices can be streamed via [Kafka](https://gcn.nasa.gov/quickstart).  They are not available via GCN Classic. The SVOM Team plans to add JSON format notices at a later date.
+
+          SVOM Mission Summary: The [Space-based multi-band astronomical Variable Objects Monitor (SVOM)](https://www.svom.eu/en/the-svom-mission/) is a French-Chinese mission, result of a collaboration between the two national space agencies, [China National Space Administration (CNSA)](https://www.cnsa.gov.cn/english/index.html) and [Centre national d'études spatiales (CNES)](https://cnes.fr/en/projects/svom). SVOM mission is dedicated to the study of the most powerful transient phenomena, with a particular emphasis on gamma-ray bursts (GRBs). The SVOM spacecraft carries four multi-wavelength instruments: ECLAIRs, Gamma Ray burst Monitor (GRM), Microchannel X-ray Telescope (MXT) and Visual Telescope (VT).
+
+          Notice topics: new SVOM notices provide GRB detection and follow-up observation details. Each of the four instruments has its own dedicated topic to stream notices with their related information, see table below:
+          - `gcn.notices.svom.voevent.grm`
+          - `gcn.notices.svom.voevent.eclairs`
+          - `gcn.notices.svom.voevent.mxt`
+          - `gcn.notices.svom.voevent.vt`
+
+          A more extensive description of the information provided in these new notices is available at https://gcn.nasa.gov/missions/svom.
+      </CollectionDescription>
+    </CollectionItem>
+
+    <CollectionItem
+      className="maxw-none grid-container"
+      variantComponent={
         <CollectionCalendarDate datetime={'January 7, 2025'} />
       }
     >
